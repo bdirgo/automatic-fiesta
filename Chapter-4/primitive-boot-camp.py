@@ -1,5 +1,4 @@
 # Primative types boot camp from elements of programming interviews
-# from functools import reduce
 
 def count_bits(x):
     num_bits = 0
@@ -10,7 +9,7 @@ def count_bits(x):
 
 print("Number of '1's' in the bits representing these numbers")
 
-for x in range(1,2**64):
+for x in range(1,100):
     print(str(x) + ":")
     print(count_bits(x))
     print(hex(x))
