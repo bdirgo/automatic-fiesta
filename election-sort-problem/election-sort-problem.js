@@ -4,7 +4,7 @@ function electionWinner(votes) {
     // First Sort
     votes.sort();
     // Second count the votes for each person
-    var countedNames = votes.reduce(function (allNames, name, currentIndex) { 
+    var countedNames = votes.reduce(function (allNames, name) { 
         if (name in allNames) {
             allNames[name]++;
         }
