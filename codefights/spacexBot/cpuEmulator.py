@@ -1,5 +1,3 @@
-import json
-
 def cpuEmulator(subroutine):
     pc = [0]
     step = 0
@@ -7,6 +5,10 @@ def cpuEmulator(subroutine):
     PCMAX = 1024
     STEPMAX = 5 * pow(10, 4)
 
+    operations = {}
+    opcode = lambda f: operations.setdefault(f.__name__, f)
+
+    @opcode
     def MOV(xx, yy):
         '''
         When xx is a register, copies the value from register
@@ -14,50 +16,48 @@ def cpuEmulator(subroutine):
 
         When xx is a constant, copies the constant d to Ryy.
         '''
-        x = str(xx)
-        y = str(yy)
-        if x[0] != "R":
-            registers[y] = int(x)
+        if xx.isnumeric():
+            registers[yy] = int(xx)
         else:
-            registers[y] = registers[x]
+            registers[yy] = registers[xx]
 
+    @opcode
     def ADD(xx, yy):
         '''
         Calculates (Rxx + Ryy) MOD 2^32 and stores to Rxx
         '''
-        x = str(xx)
-        y = str(yy)
-        registers[x] = (int(registers[x]) + int(registers[y])) % MAX[0]
+        registers[xx] = (int(registers[xx]) + int(registers[yy])) % MAX[0]
 
+    @opcode
     def DEC(xx):
         '''
         Decrements Rxx by one and stores to Rxx. Decrementing 0
         will cause and underflow and results in 2^32 - 1
         '''
-        x = str(xx)
-        if int(registers[x]) == 0:
-            registers[x] = MAX[0] - 1
+        if int(registers[xx]) == 0:
+            registers[xx] = MAX[0] - 1
         else:
-            registers[x] = int(registers[x]) - 1
+            registers[xx] = int(registers[xx]) - 1
 
+    @opcode
     def INC(xx):
         '''
         Increments Rxx by one and stores to Rxx. Incrementing
         2^32 - 1 will cause and overflow and results in 0
         '''
-        x = str(xx)
-        if int(registers[x]) == MAX[0] - 1:
-            registers[x] = 0
+        if int(registers[xx]) == MAX[0] - 1:
+            registers[xx] = 0
         else:
-            registers[x] = int(registers[x]) + 1
+            registers[xx] = int(registers[xx]) + 1
 
+    @opcode
     def INV(xx):
         '''
         bitwise inversion of Rxx
         '''
-        x = str(xx)
-        registers[x] = ~int(registers[x])
+        registers[xx] = ~int(registers[xx])
 
+    @opcode
     def JMP(d):
         '''
         d is the 1-indexed location of the instruction to
@@ -68,6 +68,7 @@ def cpuEmulator(subroutine):
         pc[0] = int(d) - 2
 
 
+    @opcode
     def JZ(d):
         '''
         d is the 1-indexed location of the instruction to
@@ -80,17 +81,13 @@ def cpuEmulator(subroutine):
         if registers["R00"] == 0:
             pc[0] = int(d) - 2
 
-
+    # import array
+    # registers = memoryview(array.array('I', [0 for i in range(43)]))
+    #
+    # from collections import namedtuple
+    # registers = namedtuple('registers', ''.join(['R' + str(i).zfill(2) + ' ' for i in range(43)]))
+    # IMMUTABLE NEVERMIND
     registers = {"R" + str(i).zfill(2): 0 for i in range(43)}
-    operations = {
-        "ADD":  ADD,
-        "DEC":  DEC,
-        "INC":  INC,
-        "INV":  INV,
-        "JMP":  JMP,
-        "JZ":   JZ,
-        "MOV":  MOV
-    }
 
     while pc[0] < PCMAX:
         step +=1
@@ -111,7 +108,7 @@ def cpuEmulator(subroutine):
         # Debug Print statements
         # print("Step: \t", step)
         # print("PC: \t", pc[0])
-        # print("Registers: \n", json.dumps(registers, indent = 2))
+        # print("Registers: \n", registers)
         if pc[0] < len(subroutine) - 1:
             # print("\nadd one to program counter\n")
             pc[0] += 1
@@ -120,7 +117,7 @@ def cpuEmulator(subroutine):
             break
 
         if step > STEPMAX:
-            print("\nexit subroutine - infinite loop\n")
+            # print("\nexit subroutine - infinite loop\n")
             break
 
     return str(registers["R42"])
