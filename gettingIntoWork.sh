@@ -4,12 +4,16 @@
 #
 
 if [ "$1" == "--help" ]; then
-  echo "Usage: `basename $0` call this in your 'git-repos' folder to pull in every repository you have"
-  echo "This will go into each repository of the folder it is called in and first stash any non-commited"
-  echo "work. Then checkout the 'develop' branch, and pull."
+  echo "Usage: `basename $0` [branchname] call this in your 'git-repos' folder to pull in every repository you have"
+  echo "This will go into each submodule of each repository it can find and first stash any non-commited work."
+  echo "Then checkout the 'develop' branch, and pull if no branchname is supplied. If you add a branchname it"
+  echo "will checkout the branchname you need. "
+  echo "If you have a lot of repos with a lot of submodules this will take a while, but it's quicker then doing"
+  echo "it yourself."
   exit 0
 fi
 
+BRANCHNAME=$1
 REPOSITORIES=`pwd`
 
 for REPO in `ls "$REPOSITORIES/"`
@@ -34,10 +38,18 @@ do
 			# Fetch for the heck of it
 			git sfe git fetch
 
-			# Checkout develop
-			echo "---------------------------------------"
-			echo "Checking out Develop $REPOSITORIES/$REPO"
-			git sfe git co develop
+			if [ -n $BRANCHNAME ]
+				# Checkout supplied branch name
+				echo "---------------------------------------"
+				echo "Checking out $BRANCHNAME in $REPOSITORIES/$REPO"
+				git sfe git co $BRANCHNAME
+			then
+			else
+				# Checkout develop if no branch name supplied
+				echo "---------------------------------------"
+				echo "Checking out develop in $REPOSITORIES/$REPO"
+				git sfe git co develop
+			fi
 
 			# Pull
 			echo "---------------------------------------"

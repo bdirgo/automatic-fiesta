@@ -4,7 +4,7 @@
 #
 
 if [ "$1" == "--help" ]; then
-  echo "Usage: `basename $0` call this in your 'git-repos' folder to pull in every repository you have"
+  echo "Usage: `basename $0` [branchname] call this in your 'git-repos' folder to pull in every repository you have"
   echo "This will go into each repository of the folder it is called in and call the 'git checkout' +"
   echo "'your branchname' (Without the quotes). If you do not provide a branch name it will skip every repo."
   exit 0
